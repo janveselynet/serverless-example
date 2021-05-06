@@ -1,0 +1,39 @@
+service:
+  name: aws-node-typescript-kinesis
+
+plugins:
+  - serverless-webpack
+  - serverless-offline-kinesis
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+
+functions:
+  producer:
+    handler: handler.producer
+    events:
+      - http:
+          method: post
+          path: producer
+
+  consumer:
+    handler: handler.consumer
+    events:
+      - stream:
+          enabled: true
+          type: kinesis
+          arn: arn:aws:kinesis:us-east-1:000000000000:stream/event-stream
+          batchSize: 1
+          startingPosition: LATEST
+
+custom:
+  serverless-offline-kinesis:
+    apiVersion: '2013-12-02'
+    endpoint: http://localhost:4567
+    region: eu-east-1
+    accessKeyId: root
+    secretAccessKey: root
+    skipCacheInvalidation: false
+    readInterval: 500
