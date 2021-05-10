@@ -1,4 +1,4 @@
-import { APIGatewayProxyHandler, APIGatewayProxyEvent } from 'aws-lambda';
+import { APIGatewayProxyHandler } from 'aws-lambda';
 import { Kinesis } from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,7 +10,18 @@ const kinesis = new Kinesis({
 });
 
 const producer: APIGatewayProxyHandler = async (event) => {
-  
+  await kinesis.putRecord({
+    StreamName: STREAM_NAME,
+    Data: event.body,
+    PartitionKey: uuidv4(),
+  }).promise();
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: 'Message was successfully pushed to Kinesis',
+    }),
+  };
 };
 
 export default producer;
